@@ -37,6 +37,7 @@ const Task = class{
     console.log("test2", isOkay);
 });
 const Folder = class extends Set{ // folder is Set
+    static get(title) {return new Folder(title);}
     constructor(title){
         super();
         this.title = title;
@@ -50,7 +51,6 @@ const Folder = class extends Set{ // folder is Set
     } // replace, move, remove & add
     addTask(task){
         if(!(task instanceof Task)) err('invalid task'); // 강타입
-        this.tasks.add(task);
         super.add(task);
     }
     removeTask(task){
@@ -99,7 +99,9 @@ const el = (tag)=>document.createElement(tag);
 const DOMRenderer = class extends Renderer{
     constructor(parent, app){
         super(app);
-        const [folder, task] = Array.from(document.querySelectorAll('ul'));
+        this.taskEl=[];
+        const [folder, task] = Array.from(parent.querySelectorAll('ul'));
+        const [load, save] = Array.from(parent.querySelectorAll('button'));
         this.folder = folder;
         this.task = task;
         this.currentFolder = null;
@@ -154,14 +156,15 @@ const DOMRenderer = class extends Renderer{
             };
         });
         if(lastEl)
-        while(oldEl = lastEl.nextElementSibling) {
-            this.folder.removeChild(oldEl);
-        }
+            while(oldEl = lastEl.nextElementSibling) {
+                this.folder.removeChild(oldEl);
+            }
         if(!this.currentFolder) return;
         tasks = this.currentFolder.getTasks();
         if(tasks.length == 0) {
-            while(oldEl == this.task.firstElementChild) {
+            while (oldEl=this.task.firstElementChild){
                 this.task.removeChild(oldEl);
+                this.taskEl.push(oldEl);
             }
         } else {
             oldEl = this.task.firstElementChild, lastEl = null;
@@ -186,12 +189,13 @@ const DOMRenderer = class extends Renderer{
             li.addEventListener("dragstart", e=>{
                 moveTask = t;
             });
+        });
             if(lastEl)
                 while(oldEl == lastEl.nextElementSibling) {
                     this.task.removeChild(oldEl);
                     this.taskEl.push(oldEl);
                 }
-        });
+        }
     }
 };
 
